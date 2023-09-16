@@ -3,6 +3,7 @@ extern crate serde;
 use serde::Serialize;
 
 use std::f64;
+use std::ptr::null;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::HtmlCanvasElement;
@@ -150,6 +151,7 @@ impl Game {
         self.check_all_complete_rows();
         if self.is_game_over() {
             self.game_over = true;
+            // TODO: stop game
         }
         self.draw_board();
     }
@@ -168,8 +170,8 @@ impl Game {
             .dyn_into::<HtmlCanvasElement>()
             .unwrap();
 
-        canvas.set_width(1000);
-        canvas.set_height(1600);
+        canvas.set_width(400);
+        canvas.set_height(600);
 
         let context: web_sys::CanvasRenderingContext2d = canvas
             .get_context("2d")
@@ -182,8 +184,8 @@ impl Game {
 
         for row in 0..16 {
             for col in 0..10 {
-                let delta: f64 = 100 as f64;
-                let box_size: f64 = 100 as f64;
+                let delta: f64 = 32 as f64;
+                let box_size: f64 = 32 as f64;
                 let tile_cells = &self.current_tetrimino.cells;
                 let fixed_cells = &self.static_blocks;
                 let tile_color = &self.current_tetrimino.color;
@@ -206,9 +208,44 @@ impl Game {
                     context.set_fill_style(&JsValue::from_str("#d8e2dc"))
                 }
 
+                // Set the border color to blue
+                context.set_stroke_style(&JsValue::from_str("#ffd9ff"));
+
+                // Set the border width
+                context.set_line_width(0.5);
+
                 context.fill_rect(col as f64 * delta, row as f64 * delta, box_size, box_size);
 
                 context.stroke_rect(col as f64 * delta, row as f64 * delta, box_size, box_size);
+
+                // score
+                // Clear previous score
+                context.clear_rect(400.0, 600.0, 200.0, 50.0);
+
+                // Set the font and color
+                context.set_font("30px Arial");
+                context.set_fill_style(&JsValue::from_str("black"));
+
+                // Draw the score
+                let score_text = format!("Score: {}", self.points);
+                context.fill_text(&score_text, 10.0, 550.0).unwrap();
+
+                if self.game_over {
+
+                    // Set the font and color for the text
+                    context.set_font("50px Arial");
+                    context.set_fill_style(&JsValue::from_str("red"));
+
+                    // Get text metrics to center the text
+                    let text = "Game Over";
+                    // let metrics = context.measure_text(text).unwrap();
+                    // let text_width = metrics.width();
+                    // let x = (canvas_width - text_width) / 2.0;
+                    // let y = canvas_height / 2.0;
+
+                    // Draw "Game Over" text centered on the canvas
+                    context.fill_text(text, 40.00, 200.00).expect("Failed to render text");
+                }
             }
         }
     }
