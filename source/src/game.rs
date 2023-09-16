@@ -17,6 +17,9 @@ pub struct Game {
     current_tetrimino: Tetrimino,
     next_tetrimino: Tetrimino,
     static_blocks: Vec<Point>,
+    game_over: bool,
+    points: i64,
+    best_score: i64,
 }
 #[derive(Serialize, Clone, Copy)]
 pub struct Board {
@@ -26,14 +29,20 @@ pub struct Board {
 #[wasm_bindgen]
 impl Board {}
 
+static mut BEST_SCORE: i32 = 0;
+
 #[wasm_bindgen]
 impl Game {
+
     pub fn new() -> Self {
         Self {
-            board: Board { rows: 16, cols: 12 },
+            board: Board { rows: 16, cols: 10 },
             current_tetrimino: Tetrimino::create_random_tetrimino(),
             next_tetrimino: Tetrimino::create_random_tetrimino(), // FIXME: remove this field after fixing E0277, the trait `RefFromWasmAbi` is not implemented for `Point`
             static_blocks: vec![],
+            game_over: false,
+            points: 0,
+            best_score: 0,
         }
     }
 
@@ -42,7 +51,10 @@ impl Game {
             .cells
             .iter()
             .all(|Point { x: i, y: j }| {
-                0 <= *i && *i < self.board.cols && 0 <= *j && *j < self.board.rows
+                *i >= 0 &&
+                *i < self.board.cols &&
+                *j >= 0 &&
+                *j < self.board.rows
             })
     }
 
@@ -54,44 +66,90 @@ impl Game {
     }
 
     pub fn move_right(&mut self) {
-        self.current_tetrimino.center.x += 1;
-        self.current_tetrimino.cells = self
-            .current_tetrimino
-            .cells
-            .iter_mut()
-            .map(|Point { x: i, y: j }| Point { x: *i + 1, y: *j })
-            .collect();
-        self.draw_board();
+        self.next_tetrimino = self.current_tetrimino.move_right();
+        if !self.is_colliding() && self.is_tetrimino_in_bounds() {
+            self.current_tetrimino = self.next_tetrimino.clone(); // FIXME: called twice, need to impl copy trait for Point
+            self.draw_board();
+        }
     }
 
     pub fn move_left(&mut self) {
-        self.current_tetrimino.center.x -= 1;
-        self.current_tetrimino.cells = self
-            .current_tetrimino
-            .cells
-            .iter_mut()
-            .map(|Point { x: i, y: j }| Point { x: *i - 1, y: *j })
-            .collect();
-        self.draw_board();
+        self.next_tetrimino = self.current_tetrimino.move_left();
+        if !self.is_colliding() && self.is_tetrimino_in_bounds() {
+            self.current_tetrimino = self.next_tetrimino.clone(); // FIXME: called twice, need to impl copy trait for Point
+            self.draw_board();
+        }
     }
 
     pub fn rotate(&mut self) {
         self.next_tetrimino = self.current_tetrimino.rotate();
         if !self.is_colliding() && self.is_tetrimino_in_bounds() {
-            self.current_tetrimino = self.current_tetrimino.rotate(); // FIXME: called twice, need to impl copy trait for Point
+            self.current_tetrimino = self.next_tetrimino.clone(); // FIXME: called twice, need to impl copy trait for Point
             self.draw_board();
+        } else {
+            let b = serde_json::to_string("Rotate:: out of bound").unwrap();
+            let b1 = JsValue::from_str(&b);
+            web_sys::console::log_1(&b1);
         }
+    }
+
+    pub fn is_row_complete(&mut self, row: i32) -> bool{
+        let mut filled_columns = 0;
+        for point in self.static_blocks.iter() {
+            if point.y == row {
+                filled_columns += 1;
+            }
+        }
+        filled_columns == 10
+    }
+
+    fn remove_and_shift_line(&mut self, completed_row: i32) {
+        // Remove points in the completed row
+        self.static_blocks.retain(|&point| point.y != completed_row);
+    
+        // Move points that are above the completed row one step down
+        for point in self.static_blocks.iter_mut() {
+            if point.y < completed_row {
+                point.y += 1;
+            }
+        }
+    }
+
+    pub fn check_all_complete_rows(&mut self) {
+        for row in 0..15 {
+            let is_complete = self.is_row_complete(row);
+            let b = serde_json::to_string(&is_complete).unwrap();
+            let b1 = JsValue::from_str(&b);
+            web_sys::console::log_1(&b1);
+            if is_complete {
+                self.points += 10;
+                self.remove_and_shift_line(row);
+            }
+        }
+    }
+
+    pub fn is_game_over(&mut self) -> bool {
+        for point in self.static_blocks.iter() {
+            if point.y == 0 {
+                return true;
+            }
+        }
+        false
     }
 
     pub fn move_down(&mut self) {
         self.next_tetrimino = self.current_tetrimino.move_down();
         if !self.is_colliding() && self.is_tetrimino_in_bounds() {
-            self.current_tetrimino = self.current_tetrimino.move_down(); // FIXME: called twice, need to impl copy trait for Point
+            self.current_tetrimino = self.next_tetrimino.clone(); // FIXME: called twice, need to impl copy trait for Point
         } else {
             self.current_tetrimino.cells.iter().for_each(|p| {
                 self.static_blocks.push(*p);
             });
             self.current_tetrimino = Tetrimino::create_random_tetrimino();
+        }
+        self.check_all_complete_rows();
+        if self.is_game_over() {
+            self.game_over = true;
         }
         self.draw_board();
     }
@@ -128,6 +186,7 @@ impl Game {
                 let box_size: f64 = 100 as f64;
                 let tile_cells = &self.current_tetrimino.cells;
                 let fixed_cells = &self.static_blocks;
+                let tile_color = &self.current_tetrimino.color;
                 println!("tile_cells is {:?}", &tile_cells);
                 let json_str = serde_json::to_string(&self).unwrap();
                 let js_value = JsValue::from_str(&json_str);
@@ -139,12 +198,12 @@ impl Game {
                     let b = serde_json::to_string(&col).unwrap();
                     let b1 = JsValue::from_str(&b);
                     web_sys::console::log_1(&b1);
-                    context.set_fill_style(&JsValue::from_str("black"))
+                    context.set_fill_style(&JsValue::from_str(tile_color))
                 } else {
-                    context.set_fill_style(&JsValue::from_str("white"))
+                    context.set_fill_style(&JsValue::from_str("#fbfaff"))
                 }
                 if fixed_cells.contains(&Point { x: col, y: row }) {
-                    context.set_fill_style(&JsValue::from_str("red"))
+                    context.set_fill_style(&JsValue::from_str("#d8e2dc"))
                 }
 
                 context.fill_rect(col as f64 * delta, row as f64 * delta, box_size, box_size);
