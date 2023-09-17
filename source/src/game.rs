@@ -3,7 +3,6 @@ extern crate serde;
 use serde::Serialize;
 
 use std::f64;
-use std::ptr::null;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::HtmlCanvasElement;
@@ -30,14 +29,14 @@ pub struct Board {
 #[wasm_bindgen]
 impl Board {}
 
-static mut BEST_SCORE: i32 = 0;
+static mut BEST_SCORE: i32 = 0; // TODO
 
 #[wasm_bindgen]
 impl Game {
 
     pub fn new() -> Self {
         Self {
-            board: Board { rows: 16, cols: 10 },
+            board: Board { rows: 16, cols: 10 }, // TODO, (row, col) to be set by client
             current_tetrimino: Tetrimino::create_random_tetrimino(),
             next_tetrimino: Tetrimino::create_random_tetrimino(), // FIXME: remove this field after fixing E0277, the trait `RefFromWasmAbi` is not implemented for `Point`
             static_blocks: vec![],
@@ -208,42 +207,23 @@ impl Game {
                     context.set_fill_style(&JsValue::from_str("#d8e2dc"))
                 }
 
-                // Set the border color to blue
                 context.set_stroke_style(&JsValue::from_str("#ffd9ff"));
-
-                // Set the border width
                 context.set_line_width(0.5);
-
                 context.fill_rect(col as f64 * delta, row as f64 * delta, box_size, box_size);
-
                 context.stroke_rect(col as f64 * delta, row as f64 * delta, box_size, box_size);
 
-                // score
-                // Clear previous score
+                // Draw scrore
                 context.clear_rect(400.0, 600.0, 200.0, 50.0);
-
-                // Set the font and color
                 context.set_font("30px Arial");
                 context.set_fill_style(&JsValue::from_str("black"));
-
-                // Draw the score
                 let score_text = format!("Score: {}", self.points);
                 context.fill_text(&score_text, 10.0, 550.0).unwrap();
 
                 if self.game_over {
-
-                    // Set the font and color for the text
+                    // Draw Game over 
                     context.set_font("50px Arial");
                     context.set_fill_style(&JsValue::from_str("red"));
-
-                    // Get text metrics to center the text
                     let text = "Game Over";
-                    // let metrics = context.measure_text(text).unwrap();
-                    // let text_width = metrics.width();
-                    // let x = (canvas_width - text_width) / 2.0;
-                    // let y = canvas_height / 2.0;
-
-                    // Draw "Game Over" text centered on the canvas
                     context.fill_text(text, 40.00, 200.00).expect("Failed to render text");
                 }
             }

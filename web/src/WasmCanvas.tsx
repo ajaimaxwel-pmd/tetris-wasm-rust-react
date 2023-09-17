@@ -3,10 +3,8 @@ import init, { start_game } from 'source';
 
 
 const WasmCanvas = () => {
-    console.log("GameT: WasmCanvas rendering");
     const initialized = useRef(false);
     useEffect(() => {
-        console.log("GameT: useEffect called");
         if (initialized.current) return;
         let cleanup: (() => void) | null = null;
 
@@ -32,16 +30,13 @@ const WasmCanvas = () => {
         };
     }, []);
 
-    // Initialize WebAssembly and the game
     const initializeGame = async () => {
         await init();
-        console.log("GameT:Starting Game...");
         const game = start_game();
         game.draw_board();
         return game;
     };
 
-    // Main game loop
     const startGameLoop = (game: any) => {
         let last = Date.now();
         const delay = 3000;
@@ -62,11 +57,9 @@ const WasmCanvas = () => {
         };
     };
 
-    // Keyboard event handling
     const setupKeyboardControls = (game: any) => {
         const keyboardControls = (event: KeyboardEvent) => {
-            console.log("GameT: Keyboard pressed");
-            console.log("event", event.keyCode);
+            // TODO: fix deprecated keyCode attr
             if (event.keyCode === 37) {
                 console.log("move left");
                 game.move_left();
@@ -83,7 +76,6 @@ const WasmCanvas = () => {
 
         document.addEventListener('keydown', keyboardControls, false);
 
-        // Return cleanup function
         return () => {
             document.removeEventListener('keydown', keyboardControls, false);
         };

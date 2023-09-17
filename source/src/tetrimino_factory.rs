@@ -4,16 +4,7 @@ use crate::{
 };
 #[derive(Debug)]
 pub struct TetriminoFactory;
-/**
- *
-    I : [Pos(0, 0), Pos(1, 0), Pos(2, 0), Pos(3, 0)] @ Pos(1, 0);
-    O : [Pos(0, 0), Pos(1, 0), Pos(0, 1), Pos(1, 1)] @ Pos(0, 0);
-    T : [Pos(0, 0), Pos(1, 0), Pos(2, 0), Pos(1, 1)] @ Pos(1, 0);
-    J : [Pos(0, 0), Pos(0, 1), Pos(0, 2), Pos(-1, 2)] @ Pos(0, 1);
-    L : [Pos(0, 0), Pos(0, 1), Pos(0, 2), Pos(1, 2)] @ Pos(0, 1);
-    S : [Pos(0, 0), Pos(1, 0), Pos(0, 1), Pos(-1, 1)] @ Pos(0, 0);
-    Z : [Pos(0, 0), Pos(-1, 0), Pos(0, 1), Pos(1, 1)] @ Pos(0, 0);
-*/
+
 impl TetriminoFactory {
     pub fn create(shape: TetriminoType) -> Tetrimino {
         match shape {
@@ -26,7 +17,7 @@ impl TetriminoFactory {
                     Point { x: 2, y: 0 },
                     Point { x: 3, y: 0 },
                 ],
-                color: "#c7eae4".to_string(),
+                color: "#c7eae4".to_string(), // TODO: to be called from an enum or hashmap or...
             },
             TetriminoType::O => Tetrimino {
                 shape,

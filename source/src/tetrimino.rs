@@ -1,6 +1,6 @@
 extern crate rand;
 use rand::Rng;
-use serde::{Serialize};
+use serde::Serialize;
 use crate::point::Point;
 use crate::tetrimino_factory::TetriminoFactory;
 
@@ -14,6 +14,7 @@ pub enum TetriminoType {
     J,
     L,
 }
+
 #[derive(Debug, Serialize, Clone)]
 pub struct Tetrimino {
     pub shape: TetriminoType,
@@ -21,6 +22,7 @@ pub struct Tetrimino {
     pub cells: Vec<Point>,
     pub color: String,
 }
+
 impl Tetrimino {
     pub fn create_random_tetrimino() -> Self {
         let mut rng = rand::thread_rng();
@@ -108,110 +110,80 @@ impl Tetrimino {
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_rotate_shape_tetrimino_i() {
-        let mut i_shape = TetriminoFactory::create(TetriminoType::I);
-        println!("---------I shape is {:?} ", i_shape);
-        let mut rotated = i_shape.rotate();
-        println!("---------1 shape rotated is {:?} ", rotated);
+    #[test]fn test_rotate_shape_tetrimino_i() {
+        let mut shape = TetriminoFactory::create(TetriminoType::I);
+        let mut rotated = shape.rotate();
         rotated = rotated.rotate();
-        println!("---------2 shape rotated is {:?} ", rotated);
         rotated = rotated.rotate();
-        println!("---------3 shape rotated is {:?} ", rotated);
         rotated = rotated.rotate();
-        println!("---------4 shape rotated is {:?} ", rotated);
-        assert_eq!(rotated.center, i_shape.center); 
-        assert_eq!(rotated.cells, i_shape.cells); 
+        assert_eq!(rotated.center, shape.center); 
+        assert_eq!(rotated.cells, shape.cells); 
     }
 
     #[test]
     fn test_rotate_shape_tetrimino_o() {
-        let mut i_shape = TetriminoFactory::create(TetriminoType::O);
-        println!("---------I shape is {:?} ", i_shape);
-        let mut rotated = i_shape.rotate();
-        println!("---------1 shape rotated is {:?} ", rotated);
+        let mut shape = TetriminoFactory::create(TetriminoType::O);
+        let mut rotated = shape.rotate();
         rotated = rotated.rotate();
-        println!("---------2 shape rotated is {:?} ", rotated);
         rotated = rotated.rotate();
-        println!("---------3 shape rotated is {:?} ", rotated);
         rotated = rotated.rotate();
-        println!("---------4 shape rotated is {:?} ", rotated);
-        assert_eq!(rotated.center, i_shape.center); 
-        assert_eq!(rotated.cells, i_shape.cells); 
+        assert_eq!(rotated.center, shape.center); 
+        assert_eq!(rotated.cells, shape.cells); 
     }
 
     #[test]
+    
     fn test_rotate_shape_tetrimino_t() {
-        let mut i_shape = TetriminoFactory::create(TetriminoType::T);
-        println!("---------I shape is {:?} ", i_shape);
-        let mut rotated = i_shape.rotate();
-        println!("---------1 shape rotated is {:?} ", rotated);
+        let mut shape = TetriminoFactory::create(TetriminoType::T);
+        let mut rotated = shape.rotate();
         rotated = rotated.rotate();
-        println!("---------2 shape rotated is {:?} ", rotated);
         rotated = rotated.rotate();
-        println!("---------3 shape rotated is {:?} ", rotated);
         rotated = rotated.rotate();
-        println!("---------4 shape rotated is {:?} ", rotated);
-        assert_eq!(rotated.center, i_shape.center); 
-        assert_eq!(rotated.cells, i_shape.cells); 
+        assert_eq!(rotated.center, shape.center); 
+        assert_eq!(rotated.cells, shape.cells); 
     }
 
     #[test]
     fn test_rotate_shape_tetrimino_j() {
-        let mut i_shape = TetriminoFactory::create(TetriminoType::J);
-        println!("---------I shape is {:?} ", i_shape);
-        let mut rotated = i_shape.rotate();
-        println!("---------1 shape rotated is {:?} ", rotated);
+        let mut shape = TetriminoFactory::create(TetriminoType::J);
+        let mut rotated = shape.rotate();
         rotated = rotated.rotate();
-        println!("---------2 shape rotated is {:?} ", rotated);
         rotated = rotated.rotate();
-        println!("---------3 shape rotated is {:?} ", rotated);
         rotated = rotated.rotate();
-        println!("---------4 shape rotated is {:?} ", rotated);
-        assert_eq!(rotated.center, i_shape.center); 
-        assert_eq!(rotated.cells, i_shape.cells); 
+        assert_eq!(rotated.center, shape.center); 
+        assert_eq!(rotated.cells, shape.cells); 
     }
 
     #[test]
     fn test_rotate_shape_tetrimino_l() {
-        let mut i_shape = TetriminoFactory::create(TetriminoType::L);
-        println!("---------I shape is {:?} ", i_shape);
-        let mut rotated = i_shape.rotate();
-        println!("---------1 shape rotated is {:?} ", rotated);
+        let mut shape = TetriminoFactory::create(TetriminoType::L);
+        let mut rotated = shape.rotate();
         rotated = rotated.rotate();
-        println!("---------2 shape rotated is {:?} ", rotated);
         rotated = rotated.rotate();
-        println!("---------3 shape rotated is {:?} ", rotated);
         rotated = rotated.rotate();
-        println!("---------4 shape rotated is {:?} ", rotated);
-        assert_eq!(rotated.center, i_shape.center); 
-        assert_eq!(rotated.cells, i_shape.cells); 
+        assert_eq!(rotated.center, shape.center); 
+        assert_eq!(rotated.cells, shape.cells); 
     }
 
     #[test]
     fn test_rotate_shape_tetrimino_s() {
-        let mut i_shape = TetriminoFactory::create(TetriminoType::S);
-        println!("---------I shape is {:?} ", i_shape);
-        let mut rotated = i_shape.rotate();
-        println!("---------1 shape rotated is {:?} ", i_shape);
+        let mut shape = TetriminoFactory::create(TetriminoType::S);
+        let mut rotated = shape.rotate();
         rotated = rotated.rotate();
-        println!("---------2 shape rotated is {:?} ", i_shape);
         rotated = rotated.rotate();
-        println!("---------3 shape rotated is {:?} ", i_shape);
         rotated = rotated.rotate();
-        println!("---------4 shape rotated is {:?} ", i_shape);
-        assert_eq!(rotated.center, i_shape.center); 
-        assert_eq!(rotated.cells, i_shape.cells); 
+        assert_eq!(rotated.center, shape.center); 
+        assert_eq!(rotated.cells, shape.cells); 
     }
 
     #[test]
     fn test_rotate_shape_tetrimino_z() {
-        let mut z_shape = TetriminoFactory::create(TetriminoType::Z);
-        let mut rotated = z_shape.rotate();
+        let mut shape = TetriminoFactory::create(TetriminoType::Z);
+        let mut rotated = shape.rotate();
         rotated = rotated.rotate();
         rotated = rotated.rotate();
         rotated = rotated.rotate();
-        assert_eq!(rotated.center, z_shape.center); 
-        assert_eq!(rotated.cells, z_shape.cells); 
+        assert_eq!(rotated.center, shape.center); 
+        assert_eq!(rotated.cells, shape.cells); 
     }
 }
